@@ -55,6 +55,7 @@ ESTILO DE LENGUAJE:
 - Escribí con buena presentación visual.
 - Separá la respuesta en párrafos cortos.
 - Cuando propongas comida, usá listas con guion "-" una por línea.
+- No uses "*" para listas. Usá siempre "-" para cada ítem.
 - Después de una lista, cerrá con una conclusión breve.
 - No pegues todo en un solo bloque.
 - - No uses markdown raro ni símbolos como **, ### o bloques de código.
