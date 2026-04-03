@@ -74,26 +74,28 @@ Formato obligatorio:
 Reglas:
 - devolver máximo 2 opciones
 - usar solo las comidas pedidas
-- si una comida no fue pedida, no la incluyas
+- no incluir comidas no pedidas
 - priorizar proteína
-- respetar de forma aproximada las calorías restantes, pero sin intentar consumir todo el restante del día en una sola comida
-- si se pide una sola comida, proponer una porción razonable para una sola comida, no para todo el día
+- respetar de forma aproximada las calorías restantes sin intentar consumir todo el restante en una sola comida
+- si se pide una sola comida, proponer una porción razonable para una sola comida
 - si se piden varias comidas, distribuir mejor calorías y proteína entre ellas
-- si hay ingredientes disponibles, priorizarlos
-- las cantidades deben ser claras y útiles para cocinar o cargar
-- hablar en medidas cocidas cuando aplique
+- priorizar ingredientes disponibles si fueron informados
+- cada comida debe ser ejecutable y no una idea general
+- cada comida debe incluir siempre ingredientes con cantidad exacta y útil para cocinar, servir y cargar en la app
+- usar como referencia principal cantidades cocidas cuando aplique
 - también podés usar unidades prácticas cuando sea más útil, por ejemplo: 2 huevos, 1 cucharada, 1 cucharadita, 10 almendras
-- no uses cantidades absurdas o exageradas para una sola comida
-- usar nombres comunes y simples
-- usar español de Argentina
+- si hay ensalada con aceite, incluir también la cantidad de aceite
+- las calorías y proteínas deben corresponder al plato completo, no por ingrediente
+- no usar cantidades absurdas o exageradas
+- evitar descripciones ambiguas como "ensalada fresca" sin detalle
+- usar nombres comunes y simples, en español de Argentina
 - usar "palta", no "aguacate"
 - usar "banana", no "plátano"
 - usar "papa", no "patata"
 - usar "carne" o "bife", no "bistec"
 - evitar nombres rebuscados, gourmet o ambiguos
-- puede quedar un poco por debajo de las calorías si sigue siendo razonable
-- no hagas explicaciones ni recomendaciones fuera del JSON
 - si hay dudas entre términos, elegir siempre la forma más común en Argentina
+- no hagas explicaciones ni recomendaciones fuera del JSON
 
 `;
 
