@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { GoogleGenAI } = require("@google/genai");
-const systemPrompt = require("./systemPrompt");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -14,37 +14,142 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+const initialSetupPrompt = `
+Sos un asistente que analiza datos físicos generales para estimar objetivos iniciales de forma práctica.
+
+Tu tarea es devolver únicamente un JSON válido.
+No saludes.
+No expliques.
+No uses markdown.
+No agregues texto fuera del JSON.
+
+Formato obligatorio:
+{
+  "pesoObjetivoKg": number,
+  "caloriasDiarias": number,
+  "proteinasDiarias": number
+}
+
+Reglas:
+- devolver números enteros
+- el peso objetivo debe ser razonable y alcanzable
+- las calorías deben apuntar a descenso de peso sostenible si corresponde
+- la proteína debe ser suficiente para preservar masa muscular
+- no hagas diagnósticos médicos
+- si hay condiciones médicas, solo usalas como contexto prudente
+`;
+
+const planMealsPrompt = `
+Sos un asistente que sugiere opciones de comida de forma simple y estructurada.
+
+Tu tarea es devolver únicamente un JSON válido.
+No saludes.
+No expliques.
+No uses markdown.
+No agregues texto fuera del JSON.
+
+Formato obligatorio:
+{
+  "options": [
+    {
+      "label": "Opción 1",
+      "meals": {
+        "desayuno": [
+          {
+            "nombre": "string",
+            "ingredientes": [
+              { "nombre": "string", "cantidad": "string" }
+            ],
+            "calorias": number,
+            "proteina": number
+          }
+        ],
+        "almuerzo": [],
+        "merienda": [],
+        "cena": []
+      }
+    }
+  ]
+}
+
+Reglas:
+- devolver máximo 2 opciones
+- usar solo las comidas pedidas
+- si una comida no fue pedida, no la incluyas
+- priorizar proteína
+- respetar de forma aproximada las calorías restantes
+- si hay ingredientes disponibles, priorizarlos
+- las cantidades deben ser claras
+- hablar en medidas cocidas cuando aplique
+- puede quedar un poco por debajo de las calorías si sigue siendo razonable
+- no hagas explicaciones ni recomendaciones fuera del JSON
+`;
+
+function parseJsonResponse(text) {
+  const cleaned = (text || "").trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) {
+      throw new Error("No se encontró un JSON válido en la respuesta");
+    }
+    return JSON.parse(match[0]);
+  }
+}
+
 app.post("/chat", async (req, res) => {
   try {
-    const { message, userData, chatHistory = [] } = req.body;
+    const { flowType, userData } = req.body;
+
+    if (!flowType || !userData) {
+      return res.status(400).json({
+        error: "Faltan flowType o userData",
+      });
+    }
+
+    let systemInstruction = "";
+    let contents = "";
+
+    if (flowType === "initial_setup") {
+      systemInstruction = initialSetupPrompt;
+
+      contents = `
+DATOS DE LA PERSONA:
+${JSON.stringify(userData, null, 2)}
+`;
+    } else if (flowType === "plan_meals") {
+      systemInstruction = planMealsPrompt;
+
+      contents = `
+DATOS PARA PLANIFICAR:
+${JSON.stringify(userData, null, 2)}
+`;
+    } else {
+      return res.status(400).json({
+        error: "flowType no válido",
+      });
+    }
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `
-DATOS DEL USUARIO:
-${JSON.stringify(userData, null, 2)}
-
-HISTORIAL RECIENTE DEL CHAT:
-${chatHistory
-  .map((msg) => `${msg.role === "user" ? "Usuario" : "Coach"}: ${msg.text}`)
-  .join("\n")}
-
-MENSAJE ACTUAL:
-${message}
-`,
+      contents,
       config: {
-       
-  systemInstruction: systemPrompt,
-},
+        systemInstruction,
+        temperature: 0.4,
+      },
     });
 
-       res.json({
-      reply: response.text,
-      suggestedMeal: null,
-    });
+    const text = response.text || "";
+    const parsed = parseJsonResponse(text);
+
+    return res.json(parsed);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error en el servidor" });
+    console.error("Error en /chat:", error);
+    return res.status(500).json({
+      error: "Error en el servidor",
+    });
   }
 });
 
