@@ -33,8 +33,9 @@ ${message}
 },
     });
 
-    res.json({
+       res.json({
       reply: response.text,
+      suggestedMeal: null,
     });
   } catch (error) {
     console.error(error);
