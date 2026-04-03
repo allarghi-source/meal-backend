@@ -71,25 +71,30 @@ Formato obligatorio:
     }
   ]
 }
-
 Reglas:
 - devolver máximo 2 opciones
 - usar solo las comidas pedidas
 - si una comida no fue pedida, no la incluyas
 - priorizar proteína
-- respetar de forma aproximada las calorías restantes
+- respetar de forma aproximada las calorías restantes, pero sin intentar consumir todo el restante del día en una sola comida
+- si se pide una sola comida, proponer una porción razonable para una sola comida, no para todo el día
+- si se piden varias comidas, distribuir mejor calorías y proteína entre ellas
 - si hay ingredientes disponibles, priorizarlos
-- las cantidades deben ser claras
+- las cantidades deben ser claras y útiles para cocinar o cargar
 - hablar en medidas cocidas cuando aplique
-- puede quedar un poco por debajo de las calorías si sigue siendo razonable
-- no hagas explicaciones ni recomendaciones fuera del JSON
+- también podés usar unidades prácticas cuando sea más útil, por ejemplo: 2 huevos, 1 cucharada, 1 cucharadita, 10 almendras
+- no uses cantidades absurdas o exageradas para una sola comida
+- usar nombres comunes y simples
 - usar español de Argentina
-- evitar palabras de España o poco usadas en Argentina
+- usar "palta", no "aguacate"
 - usar "banana", no "plátano"
 - usar "papa", no "patata"
 - usar "carne" o "bife", no "bistec"
-- usar nombres simples y comunes que coincidan con comida real y bibliotecas de una app argentina
 - evitar nombres rebuscados, gourmet o ambiguos
+- puede quedar un poco por debajo de las calorías si sigue siendo razonable
+- no hagas explicaciones ni recomendaciones fuera del JSON
+- si hay dudas entre términos, elegir siempre la forma más común en Argentina
+
 `;
 
 function parseJsonResponse(text) {
