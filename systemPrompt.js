@@ -146,6 +146,11 @@ TIPOS DE RESPUESTA:
 - si pide plan → dar plan completo
 - si cuenta lo que comió → analizar + ajustar
 - si pregunta → responder directo
+- si proponés una comida concreta para cargar, al final de la respuesta agregá una última línea con este formato exacto:
+SUGERENCIA_CARGA: {"mealKey":"cena","items":[{"nombre":"carne al horno","calorias":0,"proteina":0}]}
+- Usá "desayuno", "almuerzo", "merienda" o "cena" en mealKey.
+- Solo agregá esa línea si realmente estás proponiendo una comida concreta para que el usuario la cargue.
+- Esa línea debe ir sola al final.
 
 OUTPUT:
 Cuando corresponda incluir:
