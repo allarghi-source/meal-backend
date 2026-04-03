@@ -83,6 +83,13 @@ Reglas:
 - hablar en medidas cocidas cuando aplique
 - puede quedar un poco por debajo de las calorías si sigue siendo razonable
 - no hagas explicaciones ni recomendaciones fuera del JSON
+- usar español de Argentina
+- evitar palabras de España o poco usadas en Argentina
+- usar "banana", no "plátano"
+- usar "papa", no "patata"
+- usar "carne" o "bife", no "bistec"
+- usar nombres simples y comunes que coincidan con comida real y bibliotecas de una app argentina
+- evitar nombres rebuscados, gourmet o ambiguos
 `;
 
 function parseJsonResponse(text) {
