@@ -16,7 +16,7 @@ const ai = new GoogleGenAI({
 
 app.post("/chat", async (req, res) => {
   try {
-    const { message, userData } = req.body;
+    const { message, userData, chatHistory = [] } = req.body;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -24,7 +24,12 @@ app.post("/chat", async (req, res) => {
 DATOS DEL USUARIO:
 ${JSON.stringify(userData, null, 2)}
 
-MENSAJE:
+HISTORIAL RECIENTE DEL CHAT:
+${chatHistory
+  .map((msg) => `${msg.role === "user" ? "Usuario" : "Coach"}: ${msg.text}`)
+  .join("\n")}
+
+MENSAJE ACTUAL:
 ${message}
 `,
       config: {
