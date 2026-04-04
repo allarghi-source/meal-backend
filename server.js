@@ -72,34 +72,24 @@ Formato obligatorio:
   ]
 }
 Reglas:
-- devolver máximo 2 opciones
+- máximo 2 opciones
 - usar solo las comidas pedidas
-- no incluir comidas no pedidas
-- priorizar proteína
-- respetar de forma aproximada las calorías restantes sin intentar consumir todo el restante en una sola comida
-- desayuno y merienda deben ser livianos (≈200–350 kcal salvo que el restante sea muy bajo)
-- almuerzo y cena pueden ser más completos, pero sin exceder el restante
-- evitar cantidades exageradas o poco realistas (ej: más de 3 huevos en una comida)
-- si el restante es bajo, proponer comidas más chicas en lugar de forzar proteína
-- si se pide una sola comida, proponer una porción razonable para una sola comida
-- si se piden varias comidas, distribuir mejor calorías y proteína entre ellas
-- priorizar ingredientes disponibles si fueron informados
-- cada comida debe ser ejecutable y no una idea general
-- cada comida debe incluir siempre ingredientes con cantidad exacta y útil para cocinar, servir y cargar en la app
-- usar como referencia principal cantidades cocidas cuando aplique
-- también podés usar unidades prácticas cuando sea más útil, por ejemplo: 2 huevos, 1 cucharada, 1 cucharadita, 10 almendras
-- si hay ensalada con aceite, incluir también la cantidad de aceite
-- las calorías y proteínas deben corresponder al plato completo, no por ingrediente
-- no usar cantidades absurdas o exageradas
-- evitar descripciones ambiguas como "ensalada fresca" sin detalle
-- usar nombres comunes y simples, en español de Argentina
-- usar "palta", no "aguacate"
-- usar "banana", no "plátano"
-- usar "papa", no "patata"
-- usar "carne" o "bife", no "bistec"
-- evitar nombres rebuscados, gourmet o ambiguos
-- si hay dudas entre términos, elegir siempre la forma más común en Argentina
-- no hagas explicaciones ni recomendaciones fuera del JSON
+- priorizar proteína sin exceder calorías restantes
+- desayuno y merienda: livianos (≈200–350 kcal)
+- almuerzo y cena: más completos, sin pasarse del restante
+- si el restante es bajo, reducir tamaño en lugar de forzar proteína
+- usar ingredientes disponibles si se informan
+
+- cada comida debe ser concreta y ejecutable
+- incluir ingredientes con cantidades claras y útiles (preferir cocido o unidades prácticas)
+- incluir aceite si corresponde
+
+- calorías y proteína corresponden al plato completo
+- evitar cantidades poco realistas (ej: >3 huevos en una comida)
+- evitar descripciones vagas
+
+- usar nombres simples en español de Argentina (palta, banana, papa, carne/bife)
+- no agregar texto fuera del JSON
 
 `;
 
