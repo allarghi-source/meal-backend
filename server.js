@@ -77,6 +77,10 @@ Reglas:
 - no incluir comidas no pedidas
 - priorizar proteína
 - respetar de forma aproximada las calorías restantes sin intentar consumir todo el restante en una sola comida
+- desayuno y merienda deben ser livianos (≈200–350 kcal salvo que el restante sea muy bajo)
+- almuerzo y cena pueden ser más completos, pero sin exceder el restante
+- evitar cantidades exageradas o poco realistas (ej: más de 3 huevos en una comida)
+- si el restante es bajo, proponer comidas más chicas en lugar de forzar proteína
 - si se pide una sola comida, proponer una porción razonable para una sola comida
 - si se piden varias comidas, distribuir mejor calorías y proteína entre ellas
 - priorizar ingredientes disponibles si fueron informados
