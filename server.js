@@ -8,159 +8,73 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT || 3001;
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const INITIAL_SETUP_PROMPT = `
+Solo JSON válido. Sin texto extra, sin markdown.
+Formato: {"pesoObjetivoKg":number,"caloriasDiarias":number,"proteinasDiarias":number}
+Dados los datos físicos del usuario, devolvé enteros razonables para descenso de peso sostenible.
+Preservá masa muscular. Sin diagnósticos. Condiciones médicas solo como contexto prudente.
+`.trim();
 
-const initialSetupPrompt = `
-Sos un asistente que analiza datos físicos generales para estimar objetivos iniciales de forma práctica.
+const PLAN_MEALS_PROMPT = `
+Sugerí comidas para una persona en dieta. Solo JSON válido, sin texto extra, sin markdown.
 
-Tu tarea es devolver únicamente un JSON válido.
-No saludes.
-No expliques.
-No uses markdown.
-No agregues texto fuera del JSON.
-
-Formato obligatorio:
-{
-  "pesoObjetivoKg": number,
-  "caloriasDiarias": number,
-  "proteinasDiarias": number
-}
+Formato exacto:
+{"options":[{"label":"string","meals":{"desayuno":[{"nombre":"string","ingredientes":[{"nombre":"string","cantidad":"string"}],"calorias":number,"proteina":number}],"almuerzo":[],"merienda":[],"cena":[]}}]}
 
 Reglas:
-- devolver números enteros
-- el peso objetivo debe ser razonable y alcanzable
-- las calorías deben apuntar a descenso de peso sostenible si corresponde
-- la proteína debe ser suficiente para preservar masa muscular
-- no hagas diagnósticos médicos
-- si hay condiciones médicas, solo usalas como contexto prudente
-`;
+- Máximo 2 opciones
+- Límites estrictos por comida (nunca superarlos):
+  desayuno 150-300 kcal | merienda 100-250 kcal | almuerzo 400-600 kcal | cena 350-550 kcal
+- La suma de todas las comidas no debe superar las calorías diarias informadas
+- Proteína máxima por comida: 30g. Porciones realistas: 1 huevo, 1 lata de atún, máx 150g proteína
+- Carnes, pollo y pescado: indicar siempre en gramos cocidos (no crudo)
+- Heladera: usá solo ingredientes que tengan sentido para esa comida, no todo lo disponible
+- Cantidades concretas, español argentino (palta, papa, bife, choclo)
+- Sin texto fuera del JSON
+`.trim();
 
-const planMealsPrompt = `
-Sos un asistente que sugiere opciones de comida de forma simple y estructurada.
-
-Tu tarea es devolver únicamente un JSON válido.
-No saludes.
-No expliques.
-No uses markdown.
-No agregues texto fuera del JSON.
-
-Formato obligatorio:
-{
-  "options": [
-    {
-      "label": "Opción 1",
-      "meals": {
-        "desayuno": [
-          {
-            "nombre": "string",
-            "ingredientes": [
-              { "nombre": "string", "cantidad": "string" }
-            ],
-            "calorias": number,
-            "proteina": number
-          }
-        ],
-        "almuerzo": [],
-        "merienda": [],
-        "cena": []
-      }
-    }
-  ]
-}
-Reglas:
-- máximo 2 opciones
-- usar solo las comidas pedidas
-- priorizar proteína sin exceder calorías restantes
-- desayuno y merienda: livianos (≈200–350 kcal)
-- almuerzo y cena: más completos, sin pasarse del restante
-- si el restante es bajo, reducir tamaño en lugar de forzar proteína
-- usar ingredientes disponibles si se informan
-
-- cada comida debe ser concreta y ejecutable
-- incluir ingredientes con cantidades claras y útiles (preferir cocido o unidades prácticas)
-- incluir aceite si corresponde
-
-- calorías y proteína corresponden al plato completo
-- evitar cantidades poco realistas (ej: >3 huevos en una comida)
-- evitar descripciones vagas
-
-- usar nombres simples en español de Argentina (palta, banana, papa, carne/bife)
-- no agregar texto fuera del JSON
-
-`;
-
-function parseJsonResponse(text) {
+function parseJson(text) {
   const cleaned = (text || "").trim();
-
   try {
     return JSON.parse(cleaned);
-  } catch (error) {
+  } catch {
     const match = cleaned.match(/\{[\s\S]*\}/);
-    if (!match) {
-      throw new Error("No se encontró un JSON válido en la respuesta");
-    }
+    if (!match) throw new Error("JSON no encontrado en la respuesta");
     return JSON.parse(match[0]);
   }
 }
 
 app.post("/chat", async (req, res) => {
+  const { flowType, userData } = req.body;
+
+  if (!flowType || !userData)
+    return res.status(400).json({ error: "Faltan flowType o userData" });
+
+  const prompts = {
+    initial_setup: INITIAL_SETUP_PROMPT,
+    plan_meals: PLAN_MEALS_PROMPT,
+  };
+
+  const systemInstruction = prompts[flowType];
+  if (!systemInstruction)
+    return res.status(400).json({ error: "flowType no válido" });
+
   try {
-    const { flowType, userData } = req.body;
-
-    if (!flowType || !userData) {
-      return res.status(400).json({
-        error: "Faltan flowType o userData",
-      });
-    }
-
-    let systemInstruction = "";
-    let contents = "";
-
-    if (flowType === "initial_setup") {
-      systemInstruction = initialSetupPrompt;
-
-      contents = `
-DATOS DE LA PERSONA:
-${JSON.stringify(userData, null, 2)}
-`;
-    } else if (flowType === "plan_meals") {
-      systemInstruction = planMealsPrompt;
-
-      contents = `
-DATOS PARA PLANIFICAR:
-${JSON.stringify(userData, null, 2)}
-`;
-    } else {
-      return res.status(400).json({
-        error: "flowType no válido",
-      });
-    }
-
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents,
-      config: {
-        systemInstruction,
-        temperature: 0.4,
-      },
+      contents: JSON.stringify(userData),
+      config: { systemInstruction, temperature: 0.4 },
     });
 
-    const text = response.text || "";
-    const parsed = parseJsonResponse(text);
-
-    return res.json(parsed);
-  } catch (error) {
-    console.error("Error en /chat:", error);
-    return res.status(500).json({
-      error: "Error en el servidor",
-    });
+    return res.json(parseJson(response.text));
+  } catch (err) {
+    console.error("Error en /chat:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
   }
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+app.listen(process.env.PORT || 3001, "0.0.0.0", () =>
+  console.log(`Servidor en http://localhost:${process.env.PORT || 3001}`)
+);
